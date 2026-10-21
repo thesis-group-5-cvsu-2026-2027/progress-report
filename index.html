@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alta Tierra · System Progress Snapshot · 2026-10-21 10:33</title>
+<meta name="description" content="Progress snapshot of the Association Dues Monitoring System">
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#fff; --ink:#15181d; --muted:#69707d;
+    --line:#e4e7ec; --accent:#2563eb; --ok:#15803d; --warn:#b45309; --bad:#b91c1c;
+    --chip:#eef1f6; --code:#f2f4f7; --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.1);
+  }
+  [data-theme="dark"]{
+    --bg:#0e1116; --panel:#151a21; --ink:#e7ebf0; --muted:#94a0b0;
+    --line:#242b35; --accent:#6ba1ff; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+    --chip:#1d242e; --code:#1a212a;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  code,kbd,pre{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px}
+
+  /* ---------- header ---------- */
+  header.top{margin-bottom:22px}
+  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  h1{font-size:clamp(22px,3.4vw,30px);margin:6px 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);margin:0 0 16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted);box-shadow:var(--shadow)
+  }
+  .chip b{color:var(--ink);font-weight:600}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+  .toolbar input{
+    flex:1 1 240px;min-width:180px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);font-size:14px;box-shadow:var(--shadow)
+  }
+  .toolbar input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  button{
+    padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink);font-size:14px;font-weight:550;cursor:pointer;box-shadow:var(--shadow)
+  }
+  button:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ---------- stat cards ---------- */
+  .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));margin-bottom:26px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+  .stat .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:4px}
+  .stat.ok .v{color:var(--ok)} .stat.warn .v{color:var(--warn)} .stat.bad .v{color:var(--bad)}
+
+  /* ---------- progress ---------- */
+  .progress-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:26px}
+  .bar{height:10px;border-radius:999px;background:var(--chip);overflow:hidden;margin:10px 0 6px}
+  .bar > i{display:block;height:100%;width:50%;border-radius:999px;background:linear-gradient(90deg,var(--ok),var(--accent))}
+  .bar-legend{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+
+  .ms{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+  .ms li{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:9px 12px;border-radius:10px;background:var(--bg)}
+  .ms .ico{flex:0 0 20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;margin-top:1px}
+  .ms.done .ico{background:var(--ok)} .ms.wip .ico{background:var(--warn)} .ms.todo .ico{background:var(--muted)}
+  .ms.todo{opacity:.72}
+
+  /* ---------- note ---------- */
+  .note{
+    border-left:4px solid var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--panel));
+    border-radius:10px;padding:14px 18px;margin-bottom:26px
+  }
+  .note h3{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--warn)}
+  .note ul{margin:0;padding-left:18px;font-size:14px}
+  .note li{margin:5px 0}
+
+  /* ---------- cards ---------- */
+  details.card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden
+  }
+  details.card > summary{
+    cursor:pointer;padding:15px 20px;font-weight:650;font-size:15px;display:flex;align-items:center;gap:10px;
+    list-style:none;user-select:none
+  }
+  details.card > summary::-webkit-details-marker{display:none}
+  details.card > summary::before{
+    content:"›";display:inline-block;transition:transform .18s ease;color:var(--muted);
+    font-size:20px;line-height:1;transform-origin:center;width:12px
+  }
+  details.card[open] > summary::before{transform:rotate(90deg)}
+  details.card > summary:hover{color:var(--accent)}
+  .body{padding:0 20px 20px;border-top:1px solid var(--line);padding-top:16px}
+  .card[hidden]{display:none}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 4px}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650;background:var(--bg)}
+  tr:last-child td{border-bottom:none}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid var(--line)}
+  .scroll table{margin:0}
+
+  /* ---------- badges ---------- */
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:650;letter-spacing:.02em}
+  .pill.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+  .pill.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+  .pill.bad{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+  .pill.neutral{background:var(--chip);color:var(--muted)}
+  .method{font-family:ui-monospace,monospace;font-size:11.5px;font-weight:700;color:var(--accent)}
+
+  pre{
+    background:var(--code);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:12.5px;
+    border:1px solid var(--line);margin:0 0 12px
+  }
+  pre:last-child{margin-bottom:0}
+  .muted{color:var(--muted)}
+  .grid2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+
+  ul.tests{columns:2;column-gap:26px;margin:8px 0 0;padding-left:18px;font-size:13px}
+  ul.tests li{break-inside:avoid;margin:3px 0}
+  @media(max-width:640px){ul.tests{columns:1}}
+
+  footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  footer code{background:var(--chip);padding:2px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Progress Snapshot</div>
+    <h1>Association Dues Monitoring System</h1>
+    <p class="sub">Alta Tierra Homeowners Association · <code class="mono">~/code/association-dues-monitoring-system</code></p>
+
+    <div class="chips">
+      <span class="chip"><span class="dot"></span><b>Tests green</b></span>
+      <span class="chip">Captured <b>2026-10-21 10:33 (+08:00)</b></span>
+      <span class="chip">Branch <b>main</b> → origin/main</span>
+      <span class="chip">HEAD <b class="mono">12234b8</b></span>
+      <span class="chip">Host <b>Aeternus</b></span>
+      <span class="chip">PHP <b>8.5.0</b> · Laravel <b>13.36.0</b></span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input id="filter" type="search" placeholder="Filter sections… (try: routes, migrations, tests, database)" aria-label="Filter sections">
+    <button id="toggle-all" type="button">Collapse all</button>
+    <button id="theme" type="button">Dark mode</button>
+  </div>
+
+  <!-- ======================= STATS ======================= -->
+  <section class="stats" aria-label="Key metrics">
+    <div class="stat ok"><div class="v">95</div><div class="k">Tests passed</div></div>
+    <div class="stat ok"><div class="v">167</div><div class="k">Assertions</div></div>
+    <div class="stat ok"><div class="v">0</div><div class="k">Failures</div></div>
+    <div class="stat ok"><div class="v">0</div><div class="k">Syntax errors</div></div>
+    <div class="stat"><div class="v">51</div><div class="k">PHP files checked</div></div>
+    <div class="stat"><div class="v">13</div><div class="k">Routes</div></div>
+    <div class="stat"><div class="v">7</div><div class="k">Migrations ran</div></div>
+    <div class="stat warn"><div class="v">2</div><div class="k">Placeholder panels</div></div>
+  </section>
+
+  <!-- ======================= MILESTONES ======================= -->
+  <section class="progress-card">
+    <strong>Delivery progress</strong>
+    <div class="bar" role="img" aria-label="5 of 10 milestones complete"><i></i></div>
+    <div class="bar-legend"><span>5 complete · 1 in progress · 4 pending</span><span>50%</span></div>
+
+    <ul class="ms">
+      <li class="done"><span class="ico">✓</span><div><b>Authentication baseline</b> — login, logout, rate limiting, RBAC foundation, forced password change <span class="pill neutral">v0.1.0-auth-baseline</span></div></li>
+      <li class="done"><span class="ico">✓</span><div><b>Route middleware guards</b> — <code>role</code> and <code>password.changed</code>, verified by feature tests</div></li>
+      <li class="done"><span class="ico">✓</span><div><b>Dues domain layer</b> — balance calculation, 12‑month standing rule, transaction eligibility</div></li>
+      <li class="done"><span class="ico">✓</span><div><b>Core data model</b> — <code>users</code>, <code>blocks_lots</code>, <code>homeowners</code>, <code>ownership_histories</code></div></li>
+      <li class="done"><span class="ico">✓</span><div><b>Homeowner property lookup connected to the database</b></div></li>
+      <li class="wip"><span class="ico">•</span><div><b>Homeowner kiosk shell</b> — layout and service cards in place; two panels are still placeholders</div></li>
+      <li class="todo"><span class="ico">·</span><div><b>Dues lookup</b> — view still says “not connected yet”</div></li>
+      <li class="todo"><span class="ico">·</span><div><b>Transaction lookup</b> — view still says “not connected yet”</div></li>
+      <li class="todo"><span class="ico">·</span><div><b>Billing &amp; payment persistence</b> — no <code>billings</code> / <code>transactions</code> tables migrated yet</div></li>
+      <li class="todo"><span class="ico">·</span><div><b>Public storage link</b> — <code>php artisan storage:link</code> not run</div></li>
+    </ul>
+  </section>
+
+  <!-- ======================= WATCH ITEMS ======================= -->
+  <div class="note">
+    <h3>Watch items for the next pass</h3>
+    <ul>
+      <li><code>/</code>, <code>/homeowner</code>, <code>/homeowner/dues</code>, <code>/homeowner/lookup</code> and <code>/homeowner/transactions</code> carry only the <code>web</code> middleware group — no <code>auth</code> guard is registered on them.</li>
+      <li>Views are <b>CACHED</b> in the local environment; run <code>php artisan view:clear</code> after Blade edits.</li>
+      <li><code>public/storage</code> is <b>NOT LINKED</b> — anything served from the public disk will 404.</li>
+      <li>The development database is empty (<code>homeowners</code>: 0, <code>blocks_lots</code>: 0), so every kiosk screen will render its empty state.</li>
+      <li>Two explicit placeholders remain in <code>resources/views/homeowner/index.blade.php</code> (lines 79 and 129).</li>
+    </ul>
+  </div>
+
+  <!-- ======================= 1. GIT ======================= -->
+  <details class="card" open>
+    <summary>1 · Project &amp; Git state</summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <tbody>
+            <tr><th style="width:200px">Captured</th><td class="mono">2026-10-21T10:33:13+08:00</td></tr>
+            <tr><th>Working directory</th><td class="mono">/home/paulus/code/association-dues-monitoring-system</td></tr>
+            <tr><th>Branch</th><td class="mono">main…origin/main <span class="pill ok">in sync</span></td></tr>
+            <tr><th>HEAD</th><td class="mono">12234b8 — Connect homeowner property lookup to database</td></tr>
+            <tr><th>Working tree</th><td><span class="pill ok">clean</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Recent commits</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Commit</th><th>Message</th><th>Ref</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">12234b8</td><td>Connect homeowner property lookup to database</td><td><span class="pill neutral">HEAD → main</span></td></tr>
+            <tr><td class="mono">0c3941a</td><td>fix: update database connection settings for testing environment</td><td></td></tr>
+            <tr><td class="mono">ba25350</td><td>feat: add homeowner routes and views for dues, transactions, and lookup</td><td></td></tr>
+            <tr><td class="mono">7ddd7bf</td><td>test(auth): green suite, fix ExampleTest collision</td><td></td></tr>
+            <tr><td class="mono">513ea3e</td><td>feat(auth): login, RBAC foundation, and forced password change</td><td><span class="pill neutral">tag v0.1.0-auth-baseline</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 2. RUNTIME ======================= -->
+  <details class="card">
+    <summary>2 · Runtime &amp; framework</summary>
+    <div class="body">
+      <div class="grid2">
+        <div class="scroll">
+          <table>
+            <tbody>
+              <tr><th>PHP</th><td class="mono">8.5.0 (NTS)</td></tr>
+              <tr><th>Zend Engine</th><td class="mono">v4.5.0 · OPcache enabled</td></tr>
+              <tr><th>Laravel</th><td class="mono">13.36.0</td></tr>
+              <tr><th>Composer</th><td class="mono">2.8.12</td></tr>
+              <tr><th>Node</th><td class="mono">v24.14.0</td></tr>
+              <tr><th>npm</th><td class="mono">11.9.0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="scroll">
+          <table>
+            <tbody>
+              <tr><th>Environment</th><td class="mono">local</td></tr>
+              <tr><th>Debug mode</th><td><span class="pill warn">ENABLED</span></td></tr>
+              <tr><th>URL</th><td class="mono">localhost:8000</td></tr>
+              <tr><th>Maintenance</th><td><span class="pill ok">OFF</span></td></tr>
+              <tr><th>Timezone / Locale</th><td class="mono">UTC / en</td></tr>
+              <tr><th>public/storage</th><td><span class="pill warn">NOT LINKED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Cache &amp; drivers</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Config</th><th>Events</th><th>Routes</th><th>Views</th><th>Cache</th><th>Session</th><th>Queue</th><th>Mail</th><th>Broadcasting</th><th>Database</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="pill neutral">NOT CACHED</span></td>
+              <td><span class="pill neutral">NOT CACHED</span></td>
+              <td><span class="pill neutral">NOT CACHED</span></td>
+              <td><span class="pill warn">CACHED</span></td>
+              <td class="mono">database</td>
+              <td class="mono">database</td>
+              <td class="mono">database</td>
+              <td class="mono">log</td>
+              <td class="mono">log</td>
+              <td class="mono">pgsql</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Environment &amp; test isolation</h4>
+      <pre>APP_ENV=local
+APP_DEBUG=true
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=hoa_db
+
+# phpunit.xml — forced for tests
+DB_CONNECTION=pgsql
+DB_DATABASE=hoa_db_test
+DB_URL=</pre>
+    </div>
+  </details>
+
+  <!-- ======================= 3. ESSENTIAL FILES ======================= -->
+  <details class="card">
+    <summary>3 · Essential files</summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>File</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">app/Http/Controllers/Controller.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Http/Controllers/Auth/LoginController.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Http/Controllers/Auth/PasswordChangeController.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Models/User.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Models/BlocksLot.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Models/Homeowner.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Models/OwnershipHistory.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Domain/Dues/BalanceCalculator.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Domain/Dues/StandingEvaluator.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">app/Domain/Dues/TransactionEligibility.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">routes/web.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">resources/views/homeowner/index.blade.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">resources/views/components/homeowner/property-form.blade.php</td><td><span class="pill ok">PRESENT</span></td></tr>
+            <tr><td class="mono">public/build/manifest.json</td><td><span class="pill ok">PRESENT</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 4. BACKEND ======================= -->
+  <details class="card">
+    <summary>4 · Backend structure</summary>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Models</h4>
+          <pre>BlocksLot.php
+Homeowner.php
+OwnershipHistory.php
+User.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Http/Controllers</h4>
+          <pre>Auth/LoginController.php
+Auth/PasswordChangeController.php
+Controller.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Http/Requests</h4>
+          <pre>Auth/LoginRequest.php
+Auth/PasswordChangeRequest.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Http/Middleware</h4>
+          <pre>EnsurePasswordIsChanged.php
+EnsureUserHasRole.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Domain</h4>
+          <pre>Dues/BalanceCalculator.php
+Dues/BalanceSummary.php
+Dues/BillingLine.php
+Dues/StandingEvaluator.php
+Dues/TransactionEligibility.php
+Dues/TransactionRequirement.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">app/Enums</h4>
+          <pre>EligibilityResult.php
+Standing.php</pre>
+        </div>
+      </div>
+
+      <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">database/migrations</h4>
+      <pre>0001_01_01_000000_create_users_table.php
+0001_01_01_000001_create_cache_table.php
+0001_01_01_000002_create_jobs_table.php
+2026_10_18_123942_add_role_and_status_to_users_table.php
+2026_10_20_153825_create_blocks_lots_table.php
+2026_10_20_155636_create_homeowners_table.php
+2026_10_20_160058_create_ownership_histories_table.php</pre>
+
+      <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">database/seeders</h4>
+      <pre>DatabaseSeeder.php</pre>
+    </div>
+  </details>
+
+  <!-- ======================= 5. FRONTEND ======================= -->
+  <details class="card">
+    <summary>5 · Frontend structure</summary>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">resources/views</h4>
+          <pre>auth/login.blade.php
+auth/password-change.blade.php
+components/brand.blade.php
+components/flash-message.blade.php
+components/homeowner/property-form.blade.php
+components/homeowner/service-card.blade.php
+components/homeowner/transaction-form.blade.php
+components/navigation/sidebar.blade.php
+components/page-header.blade.php
+components/ui/stat-card.blade.php
+dashboard.blade.php
+homeowner/index.blade.php
+layouts/app.blade.php
+layouts/guest.blade.php
+layouts/homeowner.blade.php
+welcome.blade.php</pre>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">package.json</h4>
+          <pre>{
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.2"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "laravel-vite-plugin": "^3.1",
+    "vite": "^8.0.0"
+  }
+}</pre>
+          <h4 style="margin:18px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Build artefacts</h4>
+          <div class="scroll">
+            <table>
+              <tbody>
+                <tr><th>node_modules</th><td><span class="pill ok">PRESENT</span></td></tr>
+                <tr><th>Vite manifest</th><td><span class="pill ok">PRESENT</span></td></tr>
+                <tr><th>Dev server marker</th><td><span class="pill neutral">ABSENT</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 6. ROUTES ======================= -->
+  <details class="card">
+    <summary>6 · Registered routes <span class="pill neutral" style="margin-left:auto">13</span></summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Method</th><th>URI</th><th>Name</th><th>Middleware</th></tr></thead>
+          <tbody>
+            <tr><td><span class="method">GET</span></td><td class="mono">/</td><td class="muted">—</td><td class="mono">web</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">admin/dashboard</td><td class="mono">admin.dashboard</td><td class="mono">web, auth, password.changed, role:admin</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">homeowner</td><td class="mono">homeowner.index</td><td class="mono">web</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">homeowner/dues</td><td class="mono">homeowner.dues</td><td class="mono">web</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">homeowner/lookup</td><td class="mono">homeowner.lookup</td><td class="mono">web</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">homeowner/transactions</td><td class="mono">homeowner.transactions</td><td class="mono">web</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">kiosk</td><td class="mono">kiosk.home</td><td class="mono">web, auth</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">login</td><td class="mono">login</td><td class="mono">web, guest</td></tr>
+            <tr><td><span class="method">POST</span></td><td class="mono">login</td><td class="mono">login.attempt</td><td class="mono">web, guest</td></tr>
+            <tr><td><span class="method">POST</span></td><td class="mono">logout</td><td class="mono">logout</td><td class="mono">web, auth</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">password/change</td><td class="mono">password.change</td><td class="mono">web, auth</td></tr>
+            <tr><td><span class="method">POST</span></td><td class="mono">password/change</td><td class="mono">password.change.update</td><td class="mono">web, auth</td></tr>
+            <tr><td><span class="method">GET</span></td><td class="mono">staff/dashboard</td><td class="mono">staff.dashboard</td><td class="mono">web, auth, password.changed, role:admin,staff,officer</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 7. MIGRATIONS ======================= -->
+  <details class="card">
+    <summary>7 · Database migrations <span class="pill ok" style="margin-left:auto">7 ran</span></summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Migration</th><th>Batch</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">0001_01_01_000000_create_users_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">0001_01_01_000001_create_cache_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">0001_01_01_000002_create_jobs_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">2026_10_18_123942_add_role_and_status_to_users_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">2026_10_20_153825_create_blocks_lots_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">2026_10_20_155636_create_homeowners_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+            <tr><td class="mono">2026_10_20_160058_create_ownership_histories_table</td><td class="num">1</td><td><span class="pill ok">Ran</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 8. DATABASE ======================= -->
+  <details class="card">
+    <summary>8 · Database tables &amp; row counts <span class="pill neutral" style="margin-left:auto">hoa_db</span></summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Table</th><th style="text-align:right">Rows</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">public.blocks_lots</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.cache</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.cache_locks</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.failed_jobs</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.homeowners</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.job_batches</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.jobs</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.migrations</td><td class="num">7</td></tr>
+            <tr><td class="mono">public.ownership_histories</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.password_reset_tokens</td><td class="num">0</td></tr>
+            <tr><td class="mono">public.sessions</td><td class="num">3</td></tr>
+            <tr><td class="mono">public.users</td><td class="num">4</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="font-size:13px;margin:12px 0 0">Note: no <code>billings</code> or <code>transactions</code> table exists yet — the dues domain layer is currently exercised only by unit tests.</p>
+    </div>
+  </details>
+
+  <!-- ======================= 9. MARKERS ======================= -->
+  <details class="card">
+    <summary>9 · Incomplete module markers <span class="pill warn" style="margin-left:auto">2</span></summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Location</th><th>Marker</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">resources/views/homeowner/index.blade.php:79</td><td>“<b>Dues lookup is not connected yet.</b>”</td></tr>
+            <tr><td class="mono">resources/views/homeowner/index.blade.php:129</td><td>“<b>Live transaction lookup is not connected yet.</b>”</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 10. SYNTAX ======================= -->
+  <details class="card">
+    <summary>10 · PHP syntax check <span class="pill ok" style="margin-left:auto">clean</span></summary>
+    <div class="body">
+      <div class="scroll">
+        <table>
+          <tbody>
+            <tr><th style="width:220px">PHP files checked</th><td class="num" style="text-align:left">51</td></tr>
+            <tr><th>Syntax failures</th><td><span class="pill ok">0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 11. TESTS ======================= -->
+  <details class="card" open>
+    <summary>11 · Automated test suite <span class="pill ok" style="margin-left:auto">95 passed · 167 assertions · 7.49s</span></summary>
+    <div class="body">
+      <p class="muted" style="margin:0 0 14px;font-size:13.5px">Full suite against <code>hoa_db_test</code> — exit code 0.</p>
+
+      <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Unit · 40 tests</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Test class</th><th style="text-align:right">Tests</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Tests\Unit\Domain\Dues\BalanceCalculatorTest</td><td class="num">5</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Unit\Domain\Dues\BillingLineTest</td><td class="num">9</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Unit\Domain\Dues\StandingEvaluatorTest</td><td class="num">10</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Unit\Domain\Dues\StandingRecalculationTest</td><td class="num">5</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Unit\Domain\Dues\TransactionEligibilityTest</td><td class="num">10</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Unit\ExampleTest</td><td class="num">1</td><td><span class="pill ok">PASS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 style="margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Feature · 55 tests</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Test class</th><th style="text-align:right">Tests</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Tests\Feature\Auth\LoginTest</td><td class="num">11</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\Auth\LogoutTest</td><td class="num">3</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\Auth\PasswordChangeTest</td><td class="num">6</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\BlockLotTest</td><td class="num">6</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\ExampleTest</td><td class="num">1</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\HomeownerPropertyLookupTest</td><td class="num">4</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\HomeownerTest</td><td class="num">3</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\Middleware\PasswordChangedMiddlewareTest</td><td class="num">4</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\Middleware\RoleMiddlewareTest</td><td class="num">6</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\ModelRelationshipTest</td><td class="num">4</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\Models\UserModelTest</td><td class="num">3</td><td><span class="pill ok">PASS</span></td></tr>
+            <tr><td class="mono">Tests\Feature\OwnershipHistoryTest</td><td class="num">4</td><td><span class="pill ok">PASS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <details style="margin-top:18px">
+        <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)">Show all test names</summary>
+        <ul class="tests">
+          <li>a homeowner with no billings owes nothing</li>
+          <li>outstanding balance sums only what remains</li>
+          <li>months unpaid counts partial months but not settled ones</li>
+          <li>each billing keeps its own amount due so a rate change does not rewrite history</li>
+          <li>over allocation on one billing does not reduce another</li>
+          <li>remaining balance is due minus allocated, never negative <span class="muted">(5 data sets)</span></li>
+          <li>a partially paid billing is still unpaid</li>
+          <li>a fully settled billing is not unpaid</li>
+          <li>amount due cannot be negative</li>
+          <li>allocated amount cannot be negative</li>
+          <li>it applies the twelve month rule <span class="muted">(7 data sets)</span></li>
+          <li>the threshold is configurable not hardcoded</li>
+          <li>a zero month threshold tolerates no unpaid months</li>
+          <li>months unpaid cannot be negative</li>
+          <li>the threshold cannot be negative</li>
+          <li>standing follows from the billing records <span class="muted">(3 data sets)</span></li>
+          <li>paying two months reclassifies a thirteen month account as good</li>
+          <li>a partial payment on one month does not change the unpaid month count</li>
+          <li>it evaluates transactions per the business rules <span class="muted">(6 data sets)</span></li>
+          <li>partial settlement never approves on its own</li>
+          <li>requirements come from configuration not hardcoded</li>
+          <li>a requirement that does not need good standing ignores the partial flag</li>
+          <li>an unconfigured transaction type is denied by default</li>
+          <li>that true is true</li>
+          <li>login page renders</li>
+          <li>guest is redirected from protected pages</li>
+          <li>admin with flag is redirected to password change</li>
+          <li>admin without flag goes to admin dashboard</li>
+          <li>staff login goes to staff dashboard</li>
+          <li>officer login goes to staff dashboard</li>
+          <li>homeowner login goes to kiosk</li>
+          <li>invalid password is rejected</li>
+          <li>inactive user cannot log in</li>
+          <li>login is rate limited after five failures</li>
+          <li>login requires email and password</li>
+          <li>authenticated user can log out</li>
+          <li>guest posting logout is redirected to login</li>
+          <li>logout clears session data</li>
+          <li>guest cannot access password change page</li>
+          <li>flagged user can view change page</li>
+          <li>user can change password with valid input</li>
+          <li>password change fails with wrong current password</li>
+          <li>password change fails when confirmation mismatches</li>
+          <li>weak password is rejected</li>
+          <li>a property location can be created</li>
+          <li>different property locations can be created</li>
+          <li>duplicate property locations are rejected</li>
+          <li>only phase one or two is allowed</li>
+          <li>block must be positive</li>
+          <li>lot must be positive</li>
+          <li>root redirects to login</li>
+          <li>registered property is found</li>
+          <li>unregistered property is not found</li>
+          <li>phase must be one or two</li>
+          <li>block and lot must be positive integers</li>
+          <li>homeowner can be created with required name fields</li>
+          <li>optional homeowner fields can be null</li>
+          <li>homeowner contact details can be saved</li>
+          <li>flagged admin is redirected from admin dashboard</li>
+          <li>flagged staff is redirected from staff dashboard</li>
+          <li>flagged user can reach password change page</li>
+          <li>user without flag can reach dashboard</li>
+          <li>admin can access admin dashboard</li>
+          <li>staff cannot access admin dashboard</li>
+          <li>staff can access staff dashboard</li>
+          <li>officer can access staff dashboard</li>
+          <li>homeowner cannot access staff dashboard</li>
+          <li>homeowner can access kiosk</li>
+          <li>homeowner has ownership history</li>
+          <li>ownership history belongs to homeowner</li>
+          <li>ownership history belongs to property</li>
+          <li>property has ownership history</li>
+          <li>has role matches single role</li>
+          <li>has role matches any of multiple roles</li>
+          <li>dashboard route for each role</li>
+          <li>ownership can be recorded for a homeowner and property</li>
+          <li>a property can keep multiple ownership records</li>
+          <li>move out date cannot be before move in date</li>
+          <li>homeowner with ownership history cannot be deleted</li>
+        </ul>
+      </details>
+    </div>
+  </details>
+
+  <!-- ======================= 12. NETWORK ======================= -->
+  <details class="card">
+    <summary>12 · Network &amp; server status</summary>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Interfaces</h4>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Iface</th><th>State</th><th>Address</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">lo</td><td><span class="pill neutral">UNKNOWN</span></td><td class="mono">127.0.0.1/8, ::1/128</td></tr>
+                <tr><td class="mono">enp1s0</td><td><span class="pill bad">DOWN</span></td><td class="muted">—</td></tr>
+                <tr><td class="mono">wlp2s0</td><td><span class="pill ok">UP</span></td><td class="mono">192.168.1.18/24<br>fe80::5544:3a31:8007:703f/64</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Listening ports</h4>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Address</th><th>Process</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">0.0.0.0:8000</td><td class="mono">php (pid 9627) <span class="pill ok">Laravel</span></td></tr>
+                <tr><td class="mono">127.0.0.1:5432</td><td class="mono"><span class="pill ok">PostgreSQL</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="muted" style="font-size:13px;margin:12px 0 0">No Vite dev server running — the built manifest is serving assets.</p>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ======================= 13. TREE ======================= -->
+  <details class="card">
+    <summary>13 · Final working tree</summary>
+    <div class="body">
+      <pre>## main...origin/main</pre>
+      <p class="muted" style="font-size:13px;margin:0">No uncommitted changes at capture time.</p>
+    </div>
+  </details>
+
+  <footer>
+    <p>Raw report: <code>/tmp/alta-tierra-progress-20261021-103313.txt</code></p>
+    <p>Audit finished. No migrations or source edits were performed by this script.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var THEME_KEY = 'alta-tierra-snapshot-theme';
+
+  // Restore theme
+  try {
+    var saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'dark' || saved === 'light') root.dataset.theme = saved;
+  } catch (e) {}
+
+  var themeBtn = document.getElementById('theme');
+  function syncThemeLabel() {
+    themeBtn.textContent = root.dataset.theme === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  syncThemeLabel();
+
+  themeBtn.addEventListener('click', function () {
+    var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    syncThemeLabel();
+  });
+
+  // Expand / collapse all
+  var toggleAll = document.getElementById('toggle-all');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('details.card'));
+  var allOpen = true;
+
+  toggleAll.addEventListener('click', function () {
+    allOpen = !allOpen;
+    cards.forEach(function (c) { c.open = allOpen; });
+    toggleAll.textContent = allOpen ? 'Collapse all' : 'Expand all';
+  });
+
+  // Filter
+  var filter = document.getElementById('filter');
+  filter.addEventListener('input', function () {
+    var q = filter.value.trim().toLowerCase();
+    cards.forEach(function (c) {
+      var match = !q || c.textContent.toLowerCase().indexOf(q) !== -1;
+      c.hidden = !match;
+      if (match && q) c.open = true;
+    });
+  });
+
+  // Ctrl/Cmd+K focuses the filter
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      filter.focus();
+      filter.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>
